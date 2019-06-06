@@ -30,6 +30,14 @@ if False:
     # Workaround for type hints without depending on the `typing` module
     from typing import *
 
+def batched_index_select(input, dim, index):
+    views = [input.shape[0]] + \
+    	[1 if i != dim else -1 for i in range(1, len(input.shape))]
+    expanse = list(input.shape)
+    expanse[0] = -1
+    expanse[dim] = -1
+    index = index.view(views).expand(expanse)
+    return torch.gather(input, dim, index)
 
 class RandomDropout(nn.Module):
     def __init__(self, p=0.5, inplace=False):
@@ -317,8 +325,14 @@ class QueryAndGroup(nn.Module):
         """
 
         idx = ball_query(self.radius, self.nsample, xyz, new_xyz)
+        print("idx")
+        print(idx.shape)
         xyz_trans = xyz.transpose(1, 2).contiguous()
+        print("xyz trans")
+        print(xyz_trans.shape)
         grouped_xyz = grouping_operation(xyz_trans, idx)  # (B, 3, npoint, nsample)
+        print("grouped_xyz")
+        print(grouped_xyz.shape)
         grouped_xyz -= new_xyz.transpose(1, 2).unsqueeze(-1)
 
         if features is not None:

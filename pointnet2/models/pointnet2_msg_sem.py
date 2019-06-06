@@ -135,8 +135,15 @@ class Pointnet2MSG(nn.Module):
         """
         xyz, features = self._break_up_pc(pointcloud)
 
+        # print("xyz.shape:")
+        # print ("   " + str(xyz.shape))
+
+        # print("features.shape:")
+        # print ("   " + str(features.shape))
+
         l_xyz, l_features = [xyz], [features]
         for i in range(len(self.SA_modules)):
+            # print("\n------------ SA Module " + str(i) + " ------------------")
             li_xyz, li_features = self.SA_modules[i](l_xyz[i], l_features[i])
             l_xyz.append(li_xyz)
             l_features.append(li_features)

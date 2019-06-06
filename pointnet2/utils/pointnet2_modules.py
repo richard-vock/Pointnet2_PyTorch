@@ -44,16 +44,8 @@ class _PointnetSAModuleBase(nn.Module):
 
         new_features_list = []
 
-        xyz_flipped = xyz.transpose(1, 2).contiguous()
-        new_xyz = (
-            pointnet2_utils.gather_operation(
-                xyz_flipped, pointnet2_utils.furthest_point_sample(xyz, self.npoint)
-            )
-            .transpose(1, 2)
-            .contiguous()
-            if self.npoint is not None
-            else None
-        )
+        indices = pointnet2_utils.furthest_point_sample(xyz, self.npoint)
+        new_xyz = pointnet2_utils.batched_index_select(xyz, 1, indices.long()) if self.npoint is not None else None
 
         for i in range(len(self.groupers)):
             new_features = self.groupers[i](
